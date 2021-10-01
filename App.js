@@ -1,5 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
+import { ActivityIndicator } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider } from 'react-redux';
@@ -52,7 +53,7 @@ export default function App() {
   }, []);
 
   if (loading) {
-    return <></>;
+    return <ActivityIndicator size="large" color="#00ff00" />;
   }
 
   return (

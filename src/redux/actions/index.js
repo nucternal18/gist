@@ -9,6 +9,7 @@ import {
   USER_FOLLOWING_STATE_CHANGE_REQUEST,
   USER_FOLLOWING_STATE_CHANGE_SUCCESS,
   USER_FOLLOWING_STATE_CHANGE_FAIL,
+  USER_DATA_STATE_CHANGE_REQUEST,
 } from '../constants/userConstants';
 import { auth, projectFirestore } from '../../firebase/config';
 
@@ -116,8 +117,17 @@ export const fetchUserFollowing = () => async (dispatch) => {
   }
 };
 
+export const fetchUsersData = (uid, getPosts) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: USER_DATA_STATE_CHANGE_REQUEST,
+    });
+    const { users } = getState;
+  } catch (error) {}
+};
+
 export const logoutHandler = () => async (dispatch) => {
-  await auth.signOut();
+  auth.signOut();
   dispatch({
     type: USER_STATE_CHANGE_RESET,
   });

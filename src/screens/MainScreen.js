@@ -22,14 +22,14 @@ const EmptyScreen = () => {
 export const MainScreen = () => {
   const dispatch = useDispatch();
 
-  const getUsers = useSelector((state) => state.userState);
-  const { loading, currentUser, authenticated, error } = getUsers;
+  // const getUsers = useSelector((state) => state.userState);
+  // const { loading, currentUser, authenticated, error } = getUsers;
 
-  const getUserPosts = useSelector((state) => state.userPost);
-  const { loading: loadingPost, posts, error: postError } = getUserPosts;
+  // const getUserPosts = useSelector((state) => state.userPost);
+  // const { loading: loadingPost, posts, error: postError } = getUserPosts;
 
-  const getUserFollowing = useSelector((state) => state.userFollowing);
-  const { following: followedUsers } = getUserFollowing;
+  // const getUserFollowing = useSelector((state) => state.userFollowing);
+  // const { following: followedUsers } = getUserFollowing;
 
   useEffect(() => {
     dispatch(fetchUser());

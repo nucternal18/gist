@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Button, Image, FlatList } from 'react-native';
+import { StyleSheet, Text, View, Button, Image, FlatList, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutHandler } from '../../redux/actions';
-import {
-  fetchUser,
-  fetchUserPosts,
-  fetchUserFollowing,
-} from '../../redux/actions/index';
 import { projectFirestore, auth, timestamp } from '../../firebase/config';
 
 export default function ProfileScreen(props) {
@@ -24,16 +19,8 @@ export default function ProfileScreen(props) {
 
   const getUserFollowing = useSelector((state) => state.userFollowing);
   const { following } = getUserFollowing;
-  console.log({ user, userPosts, follow });
-  console.log(props.route.params.uid);
 
-  
-
-  useEffect(() => {
-    dispatch(fetchUser());
-    dispatch(fetchUserPosts());
-    dispatch(fetchUserFollowing());
-  }, []);
+  console.log(following);
 
   useEffect(() => {
     if (props.route.params.uid === auth.currentUser.uid) {
@@ -64,14 +51,12 @@ export default function ProfileScreen(props) {
           setUserPosts(posts);
         });
     }
-    // if (
-    //   typeof following.indexOf(props.route.params.uid) !== undefined &&
-    //   following.indexOf(props.route.params.uid) > -1
-    // ) {
-    //   setFollow(true);
-    // } else {
-    //   setFollow(false);
-    // }
+
+    if (following.indexOf(props.route.params.uid) > -1) {
+      setFollow(true);
+    } else {
+      setFollow(false);
+    }
   }, [props.route.params.uid, following]);
 
   const onFollow = () => {
@@ -91,11 +76,12 @@ export default function ProfileScreen(props) {
       .delete();
   };
 
-  // const logout = () => {
-  //   dispatch(logoutHandler());
-  //   navigation.navigate('Login');
-  // };
-
+  const logout = () => {
+    dispatch(logoutHandler());
+  };
+  if (user === null) {
+    return <View />;
+  }
   return (
     <View style={styles.profileContainer}>
       <View style={styles.infoContainer}>
@@ -108,9 +94,17 @@ export default function ProfileScreen(props) {
         {props.route.params.uid !== auth.currentUser.uid ? (
           <View>
             {follow ? (
-              <Button title='Following' onPress={() => onFollow()} />
+              <TouchableOpacity
+                onPress={() => onUnfollow()}
+                style={styles.button}>
+                <Text style={styles.buttonText}>Following</Text>
+              </TouchableOpacity>
             ) : (
-              <Button title='Follow' onPress={() => onUnFollow()} />
+              <TouchableOpacity
+                onPress={() => onFollow()}
+                style={styles.button}>
+                <Text style={styles.buttonText}>Follow</Text>
+              </TouchableOpacity>
             )}
           </View>
         ) : (
@@ -134,9 +128,11 @@ export default function ProfileScreen(props) {
           />
         )}
       </View>
-      {/* <View style={styles.buttonContainer}>
-        <Button title='Logout' onPress={logout} />
-      </View> */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity onPress={() => logout()} style={styles.button}>
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -157,5 +153,17 @@ const styles = StyleSheet.create({
   image: { flex: 1, aspectRatio: 1 / 1 },
   imageContainer: {
     flex: 1 / 3,
+  },
+  button: {
+    marginTop: 10,
+    backgroundColor: 'blue',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 20,
+    color: '#fff',
   },
 });
