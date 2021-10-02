@@ -6,12 +6,14 @@ import {
   fetchUserReducer,
   fetchUserPostReducer,
   fetchUserFollowingReducer,
+  fetchUsersReducer,
 } from './reducers/users';
 
 const Reducers = combineReducers({
   userState: fetchUserReducer,
   userPost: fetchUserPostReducer,
   userFollowing: fetchUserFollowingReducer,
+  usersState: fetchUsersReducer,
 });
 
 const initialState = {};

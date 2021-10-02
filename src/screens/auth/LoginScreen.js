@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+import { Button, TextInput } from 'react-native-paper';
 import {
   StyleSheet,
   Text,
   View,
-  TextInput,
   TouchableOpacity,
   Alert
 } from 'react-native';
@@ -33,7 +33,7 @@ export const LoginScreen = ({ navigation }) => {
                 return;
               }
               const user = firestoreDocument.data();
-              navigation.navigate('Home', { user });
+              navigation.navigate('Main', { user });
             });
         })
         .catch((error) => {
@@ -60,28 +60,37 @@ export const LoginScreen = ({ navigation }) => {
         <View style={styles.title}>
           <Text style={styles.titleText}>Login Screen</Text>
         </View>
+
         <TextInput
           style={styles.input}
-          placeholder='E-mail'
+          mode='outlined'
+          label='UserName'
+          placeholder='username'
           placeholderTextColor='#aaaaaa'
           onChangeText={(text) => setEmail(text)}
-          value={email}
+
           underlineColorAndroid='transparent'
           autoCapitalize='none'
         />
         <TextInput
           style={styles.input}
+          mode='outlined'
+          placeholder='password'
           placeholderTextColor='#aaaaaa'
           secureTextEntry
-          placeholder='Password'
+          label='Password'
           onChangeText={(text) => setPassword(text)}
-          value={password}
+
+          right={<TextInput.Icon name='eye' />}
           underlineColorAndroid='transparent'
           autoCapitalize='none'
         />
-        <TouchableOpacity style={styles.button} onPress={() => onLoginPress()}>
+        <Button
+          style={styles.button}
+          mode='contained'
+          onPress={() => onLoginPress()}>
           <Text style={styles.buttonTitle}>Log in</Text>
-        </TouchableOpacity>
+        </Button>
         <View style={styles.footerView}>
           <Text style={styles.footerText}>
             Don't have an account?{' '}
@@ -101,7 +110,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: { flex: 1, height: 120, width: 120, alignSelf: 'center', margin: 30 },
-  titleText: { flex:1, fontSize: 16 },
+  titleText: { flex:1, fontSize: 16, fontWeight: 'bold'},
   logo: {
     flex: 1,
     height: 120,
@@ -121,7 +130,6 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
   },
   button: {
-    backgroundColor: '#788eec',
     marginLeft: 30,
     marginRight: 30,
     marginTop: 20,

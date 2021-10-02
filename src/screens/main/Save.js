@@ -12,7 +12,7 @@ import { fetchUser } from '../../redux/actions/index';
 
 import { projectFirestore, projectStorage, auth, timestamp } from '../../firebase/config';
 
-export default function Screen(props) {
+export default function SaveScreen(props) {
     const dispatch = useDispatch();
     const uri = props.route.params.image;
     const [caption, setCaption] = useState('');
@@ -29,12 +29,12 @@ export default function Screen(props) {
             caption,
             createdAt: timestamp()
         }).then(() => {
-            props.navigation.popToTop()
+            props.navigation.navigate('Main')
         })
     }
 
   const upLoadImage = async () => {
-    const randomRef = Math.random().toString(15);
+    const randomRef = Math.random().toString(32);
       const path = `post/${auth.currentUser.uid}/${randomRef}`;
      
     const response = await fetch(uri);

@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Button, TextInput } from 'react-native-paper';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useDispatch, useSelector } from 'react-redux';
 import { userRegister } from '../../redux/actions';
@@ -67,19 +62,17 @@ export const RegisterScreen = ({ navigation }) => {
         </View>
         <TextInput
           style={styles.input}
-          placeholder='Full Name'
+          label='Full Name'
           placeholderTextColor='#aaaaaa'
           onChangeText={(text) => setFullName(text)}
-          value={fullName}
           underlineColorAndroid='transparent'
           autoCapitalize='none'
         />
         <TextInput
           style={styles.input}
-          placeholder='E-mail'
+          label='E-mail'
           placeholderTextColor='#aaaaaa'
           onChangeText={(text) => setEmail(text)}
-          value={email}
           underlineColorAndroid='transparent'
           autoCapitalize='none'
         />
@@ -87,9 +80,9 @@ export const RegisterScreen = ({ navigation }) => {
           style={styles.input}
           placeholderTextColor='#aaaaaa'
           secureTextEntry
-          placeholder='Password'
+          label='Password'
+          right={<TextInput.Icon name='eye' />}
           onChangeText={(text) => setPassword(text)}
-          value={password}
           underlineColorAndroid='transparent'
           autoCapitalize='none'
         />
@@ -97,17 +90,18 @@ export const RegisterScreen = ({ navigation }) => {
           style={styles.input}
           placeholderTextColor='#aaaaaa'
           secureTextEntry
-          placeholder='Confirm Password'
+          label='Confirm Password'
           onChangeText={(text) => setConfirmPassword(text)}
-          value={confirmPassword}
+          right={<TextInput.Icon name='eye' />}
           underlineColorAndroid='transparent'
           autoCapitalize='none'
         />
-        <TouchableOpacity
+        <Button
           style={styles.button}
+          mode='contained'
           onPress={() => onRegisterPress()}>
           <Text style={styles.buttonTitle}>Create account</Text>
-        </TouchableOpacity>
+        </Button>
         <View style={styles.footerView}>
           <Text style={styles.footerText}>
             Already got an account?{' '}
@@ -126,8 +120,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
-  title: { flex: 1, height: 120, width: 120, alignSelf: 'center', margin: 30 },
-  titleText: { fontSize: 16 },
+  title: {
+    flex: 1,
+    height: 120,
+    width: 120,
+    margin: 30,
+    alignSelf: 'center'
+  },
+  titleText: { fontSize: 18, fontWeight: 'bold', textAlign: 'center' },
   logo: {
     flex: 1,
     height: 120,
@@ -147,7 +147,6 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
   },
   button: {
-    backgroundColor: '#788eec',
     marginLeft: 30,
     marginRight: 30,
     marginTop: 20,

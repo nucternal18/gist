@@ -4,47 +4,51 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { fetchUser, fetchUserPosts, fetchUserFollowing } from '../redux/actions/index';
+import {
+  fetchUser,
+  fetchUserPosts,
+  fetchUserFollowing,
+  logoutHandler,
+} from '../redux/actions/index';
 import { auth } from '../firebase/config';
 import FeedScreen from './main/Feed';
 import AddScreen from './main/Add';
 import ProfileScreen from './main/Profile';
 import Search from './main/Search';
-
+import { COLORS } from '../constants';
 
 const Tab = createMaterialBottomTabNavigator();
-
-const EmptyScreen = () => {
-    return null
-}
-
 
 export const MainScreen = () => {
   const dispatch = useDispatch();
 
-  // const getUsers = useSelector((state) => state.userState);
-  // const { loading, currentUser, authenticated, error } = getUsers;
-
-  // const getUserPosts = useSelector((state) => state.userPost);
-  // const { loading: loadingPost, posts, error: postError } = getUserPosts;
-
-  // const getUserFollowing = useSelector((state) => state.userFollowing);
-  // const { following: followedUsers } = getUserFollowing;
-
   useEffect(() => {
+    dispatch(logoutHandler());
     dispatch(fetchUser());
     dispatch(fetchUserPosts());
     dispatch(fetchUserFollowing());
   }, []);
 
-
-
   return (
     <Tab.Navigator
       initialRouteName='Feed'
       labeled={false}
-      tabBarOptions={{
-        activeTintColor: '#4c56b2',
+      activeColor='#4c56b2'
+      inactiveColor='gray'
+      
+      barStyle={{ backgroundColor: 'black', paddingBottom: 20 }}
+      screenOptions={{
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          elevation: 0,
+          backgroundColor: COLORS.white,
+          borderTopColor: 'transparent',
+          height: 50,
+        },
       }}>
       <Tab.Screen
         name='Feed'
@@ -52,7 +56,7 @@ export const MainScreen = () => {
         options={{
           tabBarLabel: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name='home' color={color} size={24} />
+            <MaterialCommunityIcons name='home' color={color} size={30} />
           ),
         }}
       />
@@ -62,13 +66,13 @@ export const MainScreen = () => {
         options={{
           tabBarLabel: 'Search',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name='magnify' color={color} size={24} />
+            <MaterialCommunityIcons name='magnify' color={color} size={30} />
           ),
         }}
       />
       <Tab.Screen
         name='AddContainer'
-        component={EmptyScreen}
+        component={AddScreen}
         listeners={({ navigation }) => ({
           tabPress: (event) => {
             event.preventDefault();
@@ -78,7 +82,7 @@ export const MainScreen = () => {
         options={{
           tabBarLabel: 'Add',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name='plus-box' color={color} size={24} />
+            <MaterialCommunityIcons name='plus-box' color={color} size={30} />
           ),
         }}
       />
@@ -88,7 +92,7 @@ export const MainScreen = () => {
         listeners={({ navigation }) => ({
           tabPress: (event) => {
             event.preventDefault();
-            navigation.navigate('Profile', {uid: auth.currentUser.uid });
+            navigation.navigate('Profile', { uid: auth.currentUser.uid });
           },
         })}
         options={{
@@ -97,7 +101,7 @@ export const MainScreen = () => {
             <MaterialCommunityIcons
               name='account-circle'
               color={color}
-              size={24}
+              size={26}
             />
           ),
         }}

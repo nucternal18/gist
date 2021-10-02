@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Button, Image, FlatList, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View,  Image, FlatList, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { logoutHandler } from '../../redux/actions';
+
 import { projectFirestore, auth, timestamp } from '../../firebase/config';
 
 export default function ProfileScreen(props) {
-  const dispatch = useDispatch();
 
   const [userPosts, setUserPosts] = useState([]);
   const [user, setUser] = useState(null);
@@ -20,7 +19,7 @@ export default function ProfileScreen(props) {
   const getUserFollowing = useSelector((state) => state.userFollowing);
   const { following } = getUserFollowing;
 
-  console.log(following);
+  
 
   useEffect(() => {
     if (props.route.params.uid === auth.currentUser.uid) {
@@ -77,46 +76,56 @@ export default function ProfileScreen(props) {
   };
 
   const logout = () => {
-    dispatch(logoutHandler());
+    auth.signOut();
+    
   };
   if (user === null) {
     return <View />;
   }
   return (
     <View style={styles.profileContainer}>
-      <View style={styles.infoContainer}>
-        {!!user && (
-          <>
-            <Text>{user.fullName}</Text>
-            <Text>{user.email}</Text>
-          </>
-        )}
-        {props.route.params.uid !== auth.currentUser.uid ? (
-          <View>
-            {follow ? (
-              <TouchableOpacity
-                onPress={() => onUnfollow()}
-                style={styles.button}>
-                <Text style={styles.buttonText}>Following</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                onPress={() => onFollow()}
-                style={styles.button}>
-                <Text style={styles.buttonText}>Follow</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        ) : (
-          <View />
-        )}
-      </View>
       <View style={styles.galleryContainer}>
         {!!userPosts && (
           <FlatList
             numColumns={3}
             horizontal={false}
             data={userPosts}
+            keyExtractor={(item) => item.id}
+            ListHeaderComponent={
+              <View style={styles.infoContainer}>
+                {!!user && (
+                  <>
+                    <Text>{user.fullName}</Text>
+                    <Text>{user.email}</Text>
+                  </>
+                )}
+                {props.route.params.uid !== auth.currentUser.uid ? (
+                  <View>
+                    {follow ? (
+                      <TouchableOpacity
+                        onPress={() => onUnFollow()}
+                        style={styles.button}>
+                        <Text style={styles.buttonText}>Following</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
+                        onPress={() => onFollow()}
+                        style={styles.button}>
+                        <Text style={styles.buttonText}>Follow</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                ) : (
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      onPress={() => logout()}
+                      style={styles.button}>
+                      <Text style={styles.buttonText}>Logout</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            }
             renderItem={({ item }) => (
               <View style={styles.imageContainer}>
                 <Image
@@ -125,13 +134,12 @@ export default function ProfileScreen(props) {
                 />
               </View>
             )}
+            ListFooterComponent={
+              <View />
+                
+            }
           />
         )}
-      </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={() => logout()} style={styles.button}>
-          <Text style={styles.buttonText}>Logout</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -142,10 +150,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   infoContainer: {
-    margin: 20,
+    marginTop: 100,
+    paddingHorizontal: 10
   },
   buttonContainer: {
     flex: 0.5,
+    justifyContent: 'flex-end',
+
   },
   galleryContainer: {
     flex: 1,

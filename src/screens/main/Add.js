@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,9 +7,13 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Animated,
 } from 'react-native';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
+import { icons, COLORS } from '../../constants';
+
+const HEADER_HEIGHT = 350;
 
 export default function AddScreen({ navigation }) {
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
@@ -17,6 +21,7 @@ export default function AddScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
   const [image, setImage] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     (async () => {
@@ -24,7 +29,8 @@ export default function AddScreen({ navigation }) {
       setHasCameraPermission(cameraStatus.status === 'granted');
 
       if (Platform.OS !== 'web') {
-        const galleryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const galleryStatus =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (galleryStatus.status !== 'granted') {
           Alert.alert(
             'Sorry, we need camera roll permissions to make this work!',
@@ -67,8 +73,99 @@ export default function AddScreen({ navigation }) {
   if (hasGalleryPermission === false) {
     return <Text>No access to Gallery</Text>;
   }
+  function renderHeaderBar() {
+    return (
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 100,
+          marginBottom: 100,
+          flexDirection: 'row',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          paddingHorizontal: 24,
+          paddingBottom: 10,
+        }}>
+        {/* Header Bar Title */}
+        <Animated.View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Text style={{ color: COLORS.white, fontSize: 14 }}>Add Pic:</Text>
+        </Animated.View>
+        {/* Back Button */}
+        <TouchableOpacity
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 35,
+            width: 35,
+            borderRadius: 18,
+            borderWidth: 1,
+            borderColor: '#F5F6FB',
+            backgroundColor: 'rgba(2, 2, 2, 0.3)',
+          }}
+          onPress={() => navigation.goBack()}>
+          <Image
+            source={icons.back}
+            style={{ width: 15, height: 15, tintColor: '#F5F6FB' }}
+          />
+        </TouchableOpacity>
+        {/* Bookmark Button */}
+        <TouchableOpacity
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 35,
+            width: 35,
+          }}>
+          <Image
+            source={icons.bookmark}
+            style={{ width: 30, height: 30, tintColor: COLORS.darkGreen }}
+          />
+        </TouchableOpacity>
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
+      <View
+        style={{
+          marginTop: 50,
+          padding: 10,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        <TouchableOpacity
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 35,
+            width: 35,
+            borderRadius: 18,
+            borderWidth: 1,
+            borderColor: COLORS.transparentBlack3,
+            backgroundColor: COLORS.blue,
+          }}
+          onPress={() => navigation.goBack()}>
+          <Image
+            source={icons.back}
+            style={{ width: 15, height: 15, tintColor: '#F5F6FB' }}
+          />
+        </TouchableOpacity>
+        <Text style={{ fontSize: 16, color: COLORS.blue, marginLeft: 5 }}>
+          Go Back
+        </Text>
+      </View>
       <View style={styles.cameraContainer}>
         <Camera
           style={styles.camera}
@@ -80,8 +177,8 @@ export default function AddScreen({ navigation }) {
 
       <View style={styles.buttonContainer}>
         <Button
-                  title='Flip Camera'
-                  style={styles.button}
+          title='Flip Camera'
+          style={styles.button}
           onPress={() => {
             setType(
               type === Camera.Constants.Type.back
@@ -116,7 +213,6 @@ const styles = StyleSheet.create({
   },
   cameraContainer: {
     flex: 1,
-
     flexDirection: 'row',
   },
   imageContainer: {
@@ -128,8 +224,8 @@ const styles = StyleSheet.create({
     flex: 1,
     aspectRatio: 1,
   },
-    button: {
-      flex: 1
+  button: {
+    flex: 1,
   },
   buttonContainer: {
     flex: 1,

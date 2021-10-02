@@ -6,56 +6,117 @@ import {
   USER_POST_STATE_CHANGE_REQUEST,
   USER_POST_STATE_CHANGE_SUCCESS,
   USER_POST_STATE_CHANGE_FAIL,
+  USERS_POSTS_STATE_CHANGE_REQUEST,
+  USERS_POSTS_STATE_CHANGE_SUCCESS,
+  USERS_POSTS_STATE_CHANGE_FAIL,
+  USERS_DATA_STATE_CHANGE_REQUEST,
+  USERS_DATA_STATE_CHANGE_SUCCESS,
+  USERS_DATA_STATE_CHANGE_FAIL,
   USER_FOLLOWING_STATE_CHANGE_REQUEST,
   USER_FOLLOWING_STATE_CHANGE_SUCCESS,
   USER_FOLLOWING_STATE_CHANGE_FAIL,
 } from '../constants/userConstants';
 
-export const fetchUserReducer = (state = { currentUser: {} }, action) => {
+const initialState = {
+  users: [],
+  usersFollowingLoaded: 0,
+  currentUser: {},
+  posts: [],
+  following: [],
+  loading: false,
+  authenticated: false,
+  error: null,
+};
+
+export const fetchUserReducer = (state = initialState, action) => {
   switch (action.type) {
     case USER_STATE_CHANGE_REQUEST:
-      return { loading: true };
+      return { ...state, loading: true };
     case USER_STATE_CHANGE_SUCCESS:
       return {
+        ...state,
         loading: false,
         currentUser: action.payload,
         authenticated: true,
       };
     case USER_STATE_CHANGE_FAIL:
-      return { loading: false, error: action.payload, authenticated: false };
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+        authenticated: false,
+      };
     case USER_STATE_CHANGE_RESET:
-      return { currentUser: {}, authenticated: false };
+      return initialState;
     default:
       return state;
   }
 };
 
-export const fetchUserPostReducer = (state = { posts: [] }, action) => {
+export const fetchUserPostReducer = (state = initialState, action) => {
   switch (action.type) {
     case USER_POST_STATE_CHANGE_REQUEST:
-      return { loading: true };
+      return { ...state, loading: true };
     case USER_POST_STATE_CHANGE_SUCCESS:
       return {
+        ...state,
         loading: false,
         posts: action.payload,
       };
     case USER_POST_STATE_CHANGE_FAIL:
-      return { loading: false, error: action.payload };
+      return { ...state, loading: false, error: action.payload };
     default:
       return state;
   }
 };
-export const fetchUserFollowingReducer = (state = { following: [] }, action) => {
+export const fetchUserFollowingReducer = (state = initialState, action) => {
   switch (action.type) {
     case USER_FOLLOWING_STATE_CHANGE_REQUEST:
-      return { loading: true };
+      return { ...state, loading: true };
     case USER_FOLLOWING_STATE_CHANGE_SUCCESS:
       return {
+        ...state,
         loading: false,
         following: action.payload,
       };
     case USER_FOLLOWING_STATE_CHANGE_FAIL:
-      return { loading: false, error: action.payload };
+      return { ...state, loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const fetchUsersReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case USERS_DATA_STATE_CHANGE_REQUEST:
+      return { ...state, loading: true };
+    case USERS_POSTS_STATE_CHANGE_REQUEST:
+      return { ...state, loading: true };
+    case USERS_DATA_STATE_CHANGE_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        users: [...state.users, action.payload],
+      };
+    case USERS_POSTS_STATE_CHANGE_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        usersFollowingLoaded: state.usersFollowingLoaded + 1,
+        users: state.users.map(user => user.uid === action.payload.uid ? {...user, posts: action.payload.posts} : user),
+      };
+    case USERS_DATA_STATE_CHANGE_FAIL:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+    case USERS_POSTS_STATE_CHANGE_FAIL:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
     default:
       return state;
   }

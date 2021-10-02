@@ -1,34 +1,43 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, TouchableOpacity } from 'react-native';
+import { Button } from 'react-native-paper';
+import { StyleSheet, Text, View } from 'react-native';
 
 export const LandingScreen = ({ navigation }) => {
   return (
     <View style={styles.landingScreen}>
-      <Text>Landing Page</Text>
+      <Text style={styles.Text}>Landing Page</Text>
 
-      <TouchableOpacity style={styles.button}>
-        <Button
-          title='Register'
-          onPress={() => navigation.navigate('Register')}
-        />
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
-        <Button title='Login' onPress={() => navigation.navigate('Login')} />
-      </TouchableOpacity>
+      <Button
+        style={styles.button}
+        mode='contained'
+        onPress={() => navigation.navigate('Register')}>
+        Register
+      </Button>
+
+      <Button
+        style={styles.button}
+        mode='contained'
+        onPress={() => navigation.navigate('Login')}>
+        Login
+      </Button>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  buttonTitle: {
+    marginBottom: 30,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
   landingScreen: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   button: {
-    backgroundColor: '#788eec',
-    marginLeft: 30,
-    marginRight: 30,
+    width: '80%',
+    paddingHorizontal: 20,
     marginTop: 20,
     height: 48,
     borderRadius: 5,
