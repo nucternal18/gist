@@ -15,10 +15,14 @@ import {
   USER_FOLLOWING_STATE_CHANGE_REQUEST,
   USER_FOLLOWING_STATE_CHANGE_SUCCESS,
   USER_FOLLOWING_STATE_CHANGE_FAIL,
+  USERS_LIKES_STATE_CHANGE_REQUEST,
+  USERS_LIKES_STATE_CHANGE_SUCCESS,
+  USERS_LIKES_STATE_CHANGE_FAIL,
 } from '../constants/userConstants';
 
 const initialState = {
   users: [],
+  feeds: [],
   usersFollowingLoaded: 0,
   currentUser: {},
   posts: [],
@@ -92,6 +96,8 @@ export const fetchUsersReducer = (state = initialState, action) => {
       return { ...state, loading: true };
     case USERS_POSTS_STATE_CHANGE_REQUEST:
       return { ...state, loading: true };
+    case USERS_LIKES_STATE_CHANGE_REQUEST:
+      return { ...state, loading: true };
     case USERS_DATA_STATE_CHANGE_SUCCESS:
       return {
         ...state,
@@ -103,7 +109,17 @@ export const fetchUsersReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         usersFollowingLoaded: state.usersFollowingLoaded + 1,
-        users: state.users.map(user => user.uid === action.payload.uid ? {...user, posts: action.payload.posts} : user),
+        feeds: [...state.feeds].concat(action.payload.posts),
+      };
+    case USERS_LIKES_STATE_CHANGE_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        feeds: state.feeds.map((post) =>
+          post.id === action.payload.postId
+            ? { ...post, currentUserLike: action.payload.currentUserLike }
+            : post
+        ),
       };
     case USERS_DATA_STATE_CHANGE_FAIL:
       return {
@@ -112,6 +128,12 @@ export const fetchUsersReducer = (state = initialState, action) => {
         error: action.payload,
       };
     case USERS_POSTS_STATE_CHANGE_FAIL:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+    case USERS_LIKES_STATE_CHANGE_FAIL:
       return {
         ...state,
         loading: false,

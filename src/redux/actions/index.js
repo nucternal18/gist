@@ -15,6 +15,9 @@ import {
   USERS_DATA_STATE_CHANGE_REQUEST,
   USERS_DATA_STATE_CHANGE_SUCCESS,
   USERS_DATA_STATE_CHANGE_FAIL,
+  USERS_LIKES_STATE_CHANGE_REQUEST,
+  USERS_LIKES_STATE_CHANGE_SUCCESS,
+  USERS_LIKES_STATE_CHANGE_FAIL,
 } from '../constants/userConstants';
 import { auth, projectFirestore } from '../../firebase/config';
 
@@ -150,10 +153,10 @@ export const fetchUsersData = (uid, getPosts) => async (dispatch, getState) => {
               payload: { message: 'User does nor exist' },
             });
           }
-          if (getPosts) {
-            dispatch(fetchUsersFollowingPosts(user.uid));
-          }
         });
+        if (getPosts) {
+          dispatch(fetchUsersFollowingPosts(uid));
+        }
     }
   } catch (error) {
     dispatch({
@@ -177,7 +180,7 @@ export const fetchUsersFollowingPosts = (uid) => async (dispatch, getState) => {
       .get()
       .then((snapshot) => {
         const uid = snapshot.docs[0].ref.path.split('/')[1];
-
+        console.log(uid)
         const user = getState().usersState.users.find((el) => el.uid === uid);
         let posts = snapshot.docs.map((doc) => {
           const data = doc.data();
@@ -190,6 +193,9 @@ export const fetchUsersFollowingPosts = (uid) => async (dispatch, getState) => {
             type: USERS_POSTS_STATE_CHANGE_SUCCESS,
             payload: { posts, uid },
           });
+          for (let i = 0; i < posts.length; i++) {
+            dispatch(fetchUsersFollowingLikes(uid, posts[i].id));
+          }
         } else {
           dispatch({
             type: USERS_POSTS_STATE_CHANGE_FAIL,
@@ -204,6 +210,40 @@ export const fetchUsersFollowingPosts = (uid) => async (dispatch, getState) => {
     });
   }
 };
+
+export const fetchUsersFollowingLikes = (uid, postId) => async (dispatch) => {
+  try {
+    dispatch({
+      type: USERS_LIKES_STATE_CHANGE_REQUEST,
+    });
+
+    projectFirestore
+      .collection('post')
+      .doc(uid)
+      .collection('userPosts')
+      .doc(postId)
+      .collection('likes')
+      .doc(auth.currentUser.uid)
+      .onSnapshot((snapshot) => {
+  
+        let currentUserLike = false;
+        if (snapshot.exists) {
+          currentUserLike = true
+        }
+        console.log(postId)
+        dispatch({
+          type: USERS_LIKES_STATE_CHANGE_SUCCESS,
+          payload: { postId, currentUserLike},
+        });
+      });
+  } catch (error) {
+    dispatch({
+      type: USERS_LIKES_STATE_CHANGE_FAIL,
+      payload: { error, message: 'No post exist' },
+    });
+  }
+};
+
 
 export const logoutHandler = () => async (dispatch) => {
   dispatch({

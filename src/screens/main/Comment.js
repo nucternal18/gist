@@ -1,25 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { TextInput, Button } from 'react-native-paper';
-import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { projectFirestore, auth, timestamp } from '../../firebase/config';
+import { fetchUsersData } from '../../redux/actions';
+import { projectFirestore, auth } from '../../firebase/config';
 import { icons, COLORS } from '../../constants';
 
 const CommentScreen = (props) => {
+  const dispatch = useDispatch();
   const [comments, setComments] = useState([]);
   const [postId, setPostId] = useState('');
-    const [message, setMessage] = useState('');
-    
-     const getUsersState = useSelector((state) => state.usersState);
-     const { users, usersFollowingLoaded } = getUsersState;
+  const [message, setMessage] = useState('');
+  const getUsersState = useSelector((state) => state.usersState);
+  const { users } = getUsersState;
 
-    useEffect(() => {
-        function matchUserToComment(comments) {
-            for (let i = 0; i < comments.length; i++) {
-              
-          }
+  useEffect(() => {
+    function matchUserToComment(comments) {
+      for (let i = 0; i < comments.length; i++) {
+        if (comments[i].hasOwnProperty('user')) {
+          continue;
+        }
+        const user = users.find((x) => x.uid === comments[i].creator);
+        if (user === undefined) {
+          dispatch(fetchUsersData(comments[i].creator, false));
+        } else {
+          comments[i].user = user;
+        }
       }
+      setComments(comments);
+    }
     if (props.route.params.postId !== postId) {
       projectFirestore
         .collection('post')
@@ -34,20 +51,23 @@ const CommentScreen = (props) => {
             const id = doc.id;
             return { id, ...data };
           });
-          setComments(comments);
+          matchUserToComment(comments);
         });
       setPostId(props.route.params.postId);
+    } else {
+      matchUserToComment(comments);
     }
-  }, [props.route.params.postId]);
+  }, [props.route.params.postId, props.users]);
 
-    const onCommentSend = () => {
-        projectFirestore
-          .collection('post')
-          .doc(props.route.params.uid)
-          .collection('userPosts')
-          .doc(props.route.params.postId)
-          .collection('comments').add({ creator: auth.currentUser.uid, message});
-    }
+  const onCommentSend = () => {
+    projectFirestore
+      .collection('post')
+      .doc(props.route.params.uid)
+      .collection('userPosts')
+      .doc(props.route.params.postId)
+      .collection('comments')
+      .add({ creator: auth.currentUser.uid, message });
+  };
   return (
     <View style={{ paddingHorizontal: 10 }}>
       <FlatList
@@ -57,40 +77,22 @@ const CommentScreen = (props) => {
         showsVerticalScrollIndicator={false}
         keyExtractor={(item, index) => `${index} ${item.id}`}
         ListHeaderComponent={
-          <View
-            style={{
-              flex: 1,
-              marginTop: 50,
-              marginBottom: 10,
-              paddingHorizontal: 10,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
+          // Header component
+          <View style={styles.goBackBtnContainer}>
             <TouchableOpacity
-              style={{
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: 35,
-                width: 35,
-                borderRadius: 18,
-                borderWidth: 1,
-                borderColor: COLORS.transparentBlack3,
-                backgroundColor: COLORS.blue,
-              }}
+              style={styles.goBackBtn}
               onPress={() => props.navigation.goBack()}>
-              <Image
-                source={icons.back}
-                style={{ width: 15, height: 15, tintColor: '#F5F6FB' }}
-              />
+              <Image source={icons.back} style={styles.backIcon} />
             </TouchableOpacity>
-            <Text style={{ fontSize: 16, color: COLORS.blue, marginLeft: 5 }}>
-              Go Back
-            </Text>
+            <Text style={styles.goBackBtnText}>Go Back</Text>
           </View>
         }
         renderItem={({ item }) => (
           <View style={{ paddingVertical: 10 }}>
-            <Text style={{ color: COLORS.black}}>{item.message}</Text>
+            {item.user !== undefined ? (
+              <Text style={{ color: COLORS.black }}>{item.user.fullName}</Text>
+            ) : null}
+            <Text style={{ color: COLORS.black }}>{item.message}</Text>
           </View>
         )}
         ListFooterComponent={
@@ -112,5 +114,36 @@ const CommentScreen = (props) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  goBackBtnContainer: {
+    flex: 1,
+    marginTop: 50,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  goBackBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 35,
+    width: 35,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: COLORS.transparentBlack3,
+    backgroundColor: COLORS.blue,
+  },
+  backIcon: {
+    width: 15,
+    height: 15,
+    tintColor: '#F5F6FB',
+  },
+  goBackBtnText: {
+    fontSize: 16,
+    color: COLORS.blue,
+    marginLeft: 5,
+  },
+});
 
 export default CommentScreen;

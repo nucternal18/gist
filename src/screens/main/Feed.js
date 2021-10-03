@@ -1,38 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import { Card,  Paragraph, Button } from 'react-native-paper';
-import { StyleSheet, View, FlatList} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { Card, Paragraph, Button } from 'react-native-paper';
+import { StyleSheet, View, FlatList } from 'react-native';
+import { useSelector } from 'react-redux';
+import { projectFirestore, auth } from '../../firebase/config';
 
-export default function MainScreen({navigation}) {
-
+export default function MainScreen({ navigation }) {
   const [posts, setPosts] = useState([]);
-
-  console.log(posts);
-  const getUsers = useSelector((state) => state.userState);
-  const { loading, currentUser, authenticated, error } = getUsers;
-
   const getUsersState = useSelector((state) => state.usersState);
-  const { users, usersFollowingLoaded } = getUsersState;
+  const { feeds, usersFollowingLoaded } = getUsersState;
 
   const getUserFollowing = useSelector((state) => state.userFollowing);
   const { following } = getUserFollowing;
 
   useEffect(() => {
-    let getPosts = [];
-    if (usersFollowingLoaded == following.length) {
-      for (let i = 0; i < following.length; i++) {
-        const user = users.find((el) => el.uid === following[i]);
-        if (user !== undefined) {
-          getPosts = [...getPosts].concat(user.posts);
-        }
-      }
-
-      posts.sort((x, y) => {
+    let updatedPost = [];
+    if (usersFollowingLoaded == following.length && following.length !== 0) {
+      feeds.sort((x, y) => {
         return x.creation - y.creation;
       });
-      setPosts(getPosts);
+      setPosts(feeds);
     }
-  }, [usersFollowingLoaded]);
+  }, [usersFollowingLoaded, feeds]);
+
+  const onLikePress = (userId, postId) => {
+    projectFirestore
+      .collection('post')
+      .doc(userId)
+      .collection('userPosts')
+      .doc(postId)
+      .collection('likes')
+      .doc(auth.currentUser.uid)
+      .set({});
+  };
+  const onDislikePress = (userId, postId) => {
+    projectFirestore
+      .collection('post')
+      .doc(userId)
+      .collection('userPosts')
+      .doc(postId)
+      .collection('likes')
+      .doc(auth.currentUser.uid)
+      .delete();
+  };
 
   return (
     <View style={styles.profileContainer}>
@@ -56,7 +65,7 @@ export default function MainScreen({navigation}) {
                   {item.user?.fullName}
                 </Paragraph>
               </Card.Content>
-              <Card.Actions>
+              <Card.Actions style={styles.actionContainer}>
                 <Button
                   onPress={() =>
                     navigation.navigate('Comment', {
@@ -66,6 +75,16 @@ export default function MainScreen({navigation}) {
                   }>
                   View Comments...
                 </Button>
+                {item.currentUserLike ? (
+                  <Button
+                    onPress={() => onDislikePress(item.user.uid, item.id)}>
+                    Dislike
+                  </Button>
+                ) : (
+                  <Button onPress={() => onLikePress(item.user.uid, item.id)}>
+                    Like
+                  </Button>
+                )}
               </Card.Actions>
             </Card>
           )}
@@ -93,5 +112,10 @@ const styles = StyleSheet.create({
   imageContainer: {
     flex: 1 / 3,
     marginBottom: 10,
+  },
+  actionContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
